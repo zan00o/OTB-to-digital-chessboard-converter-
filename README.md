@@ -108,7 +108,7 @@ If the board appears upside down, add:
 
 ---
 
-## 🧭 Next Steps (after checkpoint)
+## Next Steps
 
 - Replace manual corner clicks with an **automatic corner detector** (YOLO or pose-net).
 - Collect data from multiple boards/pieces for generalization.
