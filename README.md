@@ -1,6 +1,6 @@
-# Chess2FEN (Per-Square Baseline)
+# Chess2FEN
 
-A minimal **per-square** pipeline that converts photos of your **own chessboard** into a FEN **piece placement** string (field #1).  
+A minimal pipeline that converts photos of a chessboard to FEN.
 
 ---
 
@@ -16,7 +16,7 @@ Workflow:
 
 ---
 
-## ⚙️ Setup
+## Setup
 
 ```powershell
 # From the project root
@@ -25,7 +25,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## 🪟 Step 1 — Annotate corners (batch or single)
+## Step 1 — Annotate corners (batch or single)
 
 ### Annotate _all_ images in a folder
 
@@ -47,7 +47,7 @@ Saved files:
 `python -m src.annotate_corners --image .\input_imgs\inputImg01.jpg --out .\data\corners\inputImg01.json`
 
 ---
-## ♟️ Step 2 — Build a small dataset
+## Step 2 — Build a small dataset
 
 Use known positions (for example, the starting position) and type their FENs.  
 This automatically slices 64 crops and saves them to class folders.
@@ -74,7 +74,7 @@ data/
 ```
 ---
 
-## 🧠 Step 3 — Train the classifier (13 classes)
+## Step 3 — Train the classifier (13 classes)
 
 ```
 python -m src.train_classifier `  
@@ -87,7 +87,7 @@ python -m src.train_classifier `
 
 ---
 
-## 🔍 Step 4 — Inference: Image → FEN
+## Step 4 — Inference: Image → FEN
 
 Predict the piece placement on a new board photo:
 
@@ -105,17 +105,6 @@ Example output:
 If the board appears upside down, add:
 
 `--flip180`
-
----
-
-## 🧩 Tips
-
-- Run **all commands from the project root** (where `src/` is located).
-- Ensure `src\__init__.py` exists (even if empty).
-- Use the venv’s Python (`.\.venv\Scripts\python.exe`) instead of Anaconda’s.
-- Each image’s corner JSON should match the camera viewpoint used for that photo.
-- For class checkpoints, it’s fine to process one board and one piece set.
-    
 
 ---
 
