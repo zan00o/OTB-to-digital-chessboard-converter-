@@ -1,5 +1,5 @@
-example\ repo/
-.venv/
+/example repo/
+*venv*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
