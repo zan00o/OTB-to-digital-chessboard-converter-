@@ -1,6 +1,6 @@
 # Chess2FEN
 
-A minimal pipeline that converts photos of a chessboard to FEN.
+A minimal pipeline that converts photos of a chessboard to FEN, using OpenCV and a Tensorflow Keras CNN.
 
 ---
 
