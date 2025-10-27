@@ -1,7 +1,6 @@
 # Chess2FEN (Per-Square Baseline)
 
 A minimal **per-square** pipeline that converts photos of your **own chessboard** into a FEN **piece placement** string (field #1).  
-It’s designed for a class checkpoint or demo — simple, fast, and easy to extend.
 
 ---
 
