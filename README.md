@@ -4,7 +4,7 @@ A minimal pipeline that converts photos of a chessboard to FEN, using OpenCV and
 
 ---
 
-## 🧠 Overview
+## Overview
 
 Workflow:
 
