@@ -23,8 +23,8 @@ def build_small_cnn(num_classes: int, input_size: int = 96):
     from tensorflow.keras import layers, models
     inputs = layers.Input(shape=(input_size, input_size, 3))
     x = inputs
-    # 3 conv blocks with increasing filters
-    # each layer has Conv2D + BatchNorm + ReLU + MaxPool + Dropout
+    # 3 conv blocks with increasing filter features
+    # each layer has Conv2D + BatchNorm + ReLU + MaxPool + Dropout of 15%
     for filters in [32, 64, 96]:
         x = layers.Conv2D(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
