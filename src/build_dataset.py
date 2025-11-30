@@ -1,7 +1,7 @@
 import argparse, json, os, cv2, numpy as np
 from pathlib import Path
 from .warp import warp_board
-from .squares import split_squares, maybe_flip_180
+from .squares import split_squares, orient_board
 from .fen_utils import LABELS
 
 FEN_TO_LABEL = {
@@ -31,7 +31,7 @@ def process_one(image_path, corners_path, fen_str, out_root, img_size=96):
         return
     corners = np.array(json.load(open(corners_path)), dtype=np.float32)
     topdown, _ = warp_board(img, corners, out_size=800)
-    topdown = maybe_flip_180(topdown)  # ensure A1 is dark in bottom-left to match FEN order
+    topdown = orient_board(topdown)  # ensure A1 is dark in bottom-left to match FEN order
     crops = split_squares(topdown, pad=2)
     labels = parse_fen_placement(fen_str.strip())
 

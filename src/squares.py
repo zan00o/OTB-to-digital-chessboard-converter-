@@ -18,6 +18,7 @@ def split_squares(topdown_view, pad=2):
     crops = []
     # iterate over 8 rows, 8 columns
     # 64 crops (for squares a1 to h8)
+    # iterate from bottom to top (rank 1 to rank 8) to match FEN order
     for r in range(8):
         for c in range(8):
             # coord x0, y0, x1, y1 with padding
@@ -48,3 +49,35 @@ def maybe_flip_180(topdown_view, force_flip=False):
         # as img is a numpy array of (Height, Width, [color] channels)
         return np.ascontiguousarray(img[::-1, ::-1])
     return img
+
+def is_a1_light(topdown_view):
+    N = topdown_view.shape[0]
+    cell = N // 8
+    a1 = topdown_view[7*cell:(8*cell), 0:cell]
+    return a1.mean() > topdown_view.mean()
+
+
+def orient_board(topdown_view, force_flip=False):
+    """
+    Ensure the board is oriented correctly (a1 is dark square).
+    If force_flip is True, always flip the board 180 degrees.
+    If A1 is already dark, return as is.
+    If A1 is light, flip 90 degrees.
+    """
+    img = topdown_view.copy()
+    if force_flip:
+        return np.ascontiguousarray(img[::-1, ::-1])
+    
+    if is_a1_light(img):
+        # rotate 90 degrees clockwise
+        return np.ascontiguousarray(np.rot90(img, k=3))
+    
+    if not is_a1_dark(img):
+        return np.ascontiguousarray(img[::-1, ::-1])
+    
+    return img
+
+    
+
+
+    
