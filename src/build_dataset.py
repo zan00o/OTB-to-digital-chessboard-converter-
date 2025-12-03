@@ -24,7 +24,7 @@ def parse_fen_placement(placement):
         raise ValueError("Decoded labels != 64")
     return labels
 
-def process_one(image_path, corners_path, fen_str, out_root, img_width=96, img_height=192, height_ratio=2.0):
+def process_one(image_path, corners_path, fen_str, out_root, img_size=96):
     img = cv2.imread(str(image_path))
     if img is None:
         print(f"Could not read image {image_path}")
@@ -33,8 +33,7 @@ def process_one(image_path, corners_path, fen_str, out_root, img_width=96, img_h
     topdown, _ = warp_board(img, corners, out_size=800)
     # No orientation fix needed - corners were annotated in chess order (a8, h8, h1, a1)
     # so the warp already produces correct orientation with a8 at top-left
-    # Use taller crops to capture more of the piece above the square
-    crops = split_squares(topdown, pad=10, height_ratio=height_ratio)
+    crops = split_squares(topdown, pad=10)
     labels = parse_fen_placement(fen_str.strip())
 
     for lab in LABELS:
@@ -42,7 +41,7 @@ def process_one(image_path, corners_path, fen_str, out_root, img_width=96, img_h
 
     for i, (crop, lab) in enumerate(zip(crops, labels)):
         out_path = out_root / lab / f"{Path(image_path).stem}_{i:02d}.png"
-        resized = cv2.resize(crop, (img_width, img_height), interpolation=cv2.INTER_AREA)
+        resized = cv2.resize(crop, (img_size, img_size), interpolation=cv2.INTER_AREA)
         cv2.imwrite(str(out_path), resized)
 
     print(f"{image_path.name} → {len(crops)} squares saved")
@@ -56,9 +55,7 @@ def main():
     ap.add_argument("--corners-dir", type=str, help="Folder with corner JSONs")
     ap.add_argument("--fen-file", type=str, help="Text file: filename,FEN per line")
     ap.add_argument("--dataset-root", required=True, type=str)
-    ap.add_argument("--img-width", type=int, default=96)
-    ap.add_argument("--img-height", type=int, default=192, help="Height of output crops (default 192 for 2:1 ratio)")
-    ap.add_argument("--height-ratio", type=float, default=2.0, help="How much taller to crop (2.0 = extend one cell up)")
+    ap.add_argument("--img-size", type=int, default=96)
     args = ap.parse_args()
 
     out_root = Path(args.dataset_root) / "raw"
@@ -67,8 +64,7 @@ def main():
     if args.image:
         if not (args.corners and args.fen):
             raise SystemExit("For single-image mode, supply --image, --corners, and --fen")
-        process_one(Path(args.image), Path(args.corners), args.fen, out_root, 
-                    img_width=args.img_width, img_height=args.img_height, height_ratio=args.height_ratio)
+        process_one(Path(args.image), Path(args.corners), args.fen, out_root, img_size=args.img_size)
         return
 
     # Option B — folder mode
@@ -98,8 +94,7 @@ def main():
         if not corners_path.exists():
             print(f"Missing corners for {name}, skipping.")
             continue
-        process_one(img_path, corners_path, fen_str, out_root, 
-                    img_width=args.img_width, img_height=args.img_height, height_ratio=args.height_ratio)
+        process_one(img_path, corners_path, fen_str, out_root, img_size=args.img_size)
 
     print("Dataset build complete.")
 

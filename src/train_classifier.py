@@ -23,9 +23,9 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report
 
 # Define a small CNN model w/ tensorflow.keras
-def build_small_cnn(num_classes: int, input_height: int = 192, input_width: int = 96):
+def build_small_cnn(num_classes: int, input_size: int = 96):
     from tensorflow.keras import layers, models
-    inputs = layers.Input(shape=(input_height, input_width, 3))
+    inputs = layers.Input(shape=(input_size, input_size, 3))
     x = inputs
     # 3 conv blocks with increasing filter features
     # each layer has Conv2D + BatchNorm + ReLU + MaxPool + Dropout of 15%
@@ -62,13 +62,12 @@ def main():
                     help="folder with 13 class subfolders (created by build_dataset.py)")
     ap.add_argument("--out", required=True, type=str,
                     help="path to save Keras model, e.g., models/classifier.keras")
-    ap.add_argument("--img-width", type=int, default=96)
-    ap.add_argument("--img-height", type=int, default=192, help="Height of input images (default 192 for 2:1 ratio)")
+    ap.add_argument("--img-size", type=int, default=96)
     ap.add_argument("--batch-size", type=int, default=64)
     ap.add_argument("--epochs", type=int, default=30)
     args = ap.parse_args()
 
-    image_size = (args.img_height, args.img_width)  # TensorFlow uses (height, width)
+    image_size = (args.img_size, args.img_size)
 
     # Class weighting
     dataset_path = pathlib.Path(args.dataset_root)
@@ -131,7 +130,7 @@ def main():
               .prefetch(AUTOTUNE))
 
     # Build & train model with class weights
-    model = build_small_cnn(num_classes=num_classes, input_height=args.img_height, input_width=args.img_width)
+    model = build_small_cnn(num_classes=num_classes, input_size=args.img_size)
     history = model.fit(train_ds, validation_data=val_ds, epochs=args.epochs, class_weight=class_weight, callbacks=callbacks)
 
     # Save model
