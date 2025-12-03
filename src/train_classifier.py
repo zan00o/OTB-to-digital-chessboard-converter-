@@ -9,8 +9,8 @@ Hyperparameters:
 - image size: 96x96
 - batch size: 64
 - epochs: 12
-- Dropout: 0.15 after conv layers, 0.25 before dense
-- Augmentations: random flip, rotation, zoom, contrast
+- Dropout: 0.1 after conv layers, 0.20 before dense
+- Augmentations: none (caused very bad model collapse)
 - ReLU activations, batch normalization
 - Adam optimizer, categorical crossentropy loss
 - Softmax output for multi-class classification
@@ -87,9 +87,10 @@ def main():
     class_weight = {}
     for idx, class_name in enumerate(sorted(class_counts.keys())):
         count = class_counts[class_name]
-        # class weight inversely proportional to frequency in dataset, capped at 10.0
         raw_weight = total_samples / (num_classes_count * count)
-        class_weight[idx] = min(10.0, raw_weight)
+        class_weight[idx] = raw_weight
+        if class_name == "empty":
+            class_weight[idx] = 0.05
     
     print("Class counts:", class_counts)
     print("Class weights:", {sorted(class_counts.keys())[i]: f"{w:.2f}" for i, w in class_weight.items()})
