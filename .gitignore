@@ -1,7 +1,9 @@
 /example repo/
 *venv*/
 
-data/dataset/raw/*
+data/dataset/raw/
+data/dataset/train_split/
+data/dataset/val_split/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
