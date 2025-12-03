@@ -1,7 +1,7 @@
 import argparse, json, numpy as np, cv2, tensorflow as tf
 from pathlib import Path
 from .warp import warp_board
-from .squares import split_squares, maybe_flip_180
+from .squares import split_squares
 from .fen_utils import LABELS, grid_to_fen_placement, full_fen_from_placement
 
 def main():
@@ -10,7 +10,6 @@ def main():
     ap.add_argument("--corners", required=True, type=str)
     ap.add_argument("--model", required=True, type=str)
     ap.add_argument("--img-size", type=int, default=96)
-    ap.add_argument("--flip180", action="store_true", help="force 180° flip if needed")
     args = ap.parse_args()
 
     img = cv2.imread(args.image)
@@ -26,7 +25,8 @@ def main():
         class_names = LABELS
 
     topdown, _ = warp_board(img, corners, out_size=800)
-    topdown = maybe_flip_180(topdown, force_flip=args.flip180)
+    # No orientation fix needed - corners should be annotated in chess order (a8, h8, h1, a1)
+    # so the warp already produces correct orientation with a8 at top-left
     crops = split_squares(topdown, pad=2)
 
     batch = np.stack([cv2.resize(c, (args.img_size, args.img_size)) for c in crops], axis=0)
