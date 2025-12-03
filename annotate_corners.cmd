@@ -1,5 +1,5 @@
 @echo off
-set "POSITIONS=input_imgs"
+set "POSITIONS=input_imgs\new"
 set "CORNERS=data\corners"
 
 for /D %%F in ("%POSITIONS%\*") do (

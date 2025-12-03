@@ -14,7 +14,7 @@ for /D %%F in ("%POSITIONS%\*") do (
       --corners-dir "%CORNERS%\%%~nF" ^
       --fen-file "%%F\fen_list.csv" ^
       --dataset-root "%DATASET%" ^
-      --img-size 96
+      --img-width 96 --img-height 192 --height-ratio 2.0
   ) else (
     echo Skipping %%F (no fen_list.csv found)
   )

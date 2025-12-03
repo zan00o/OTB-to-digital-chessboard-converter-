@@ -9,7 +9,9 @@ def main():
     ap.add_argument("--image", required=True, type=str)
     ap.add_argument("--corners", required=True, type=str)
     ap.add_argument("--model", required=True, type=str)
-    ap.add_argument("--img-size", type=int, default=96)
+    ap.add_argument("--img-width", type=int, default=96)
+    ap.add_argument("--img-height", type=int, default=192, help="Height of crops (default 192 for 2:1 ratio)")
+    ap.add_argument("--height-ratio", type=float, default=2.0, help="How much taller to crop (2.0 = extend one cell up)")
     args = ap.parse_args()
 
     img = cv2.imread(args.image)
@@ -25,11 +27,11 @@ def main():
         class_names = LABELS
 
     topdown, _ = warp_board(img, corners, out_size=800)
-    # No orientation fix needed - corners should be annotated in chess order (a8, h8, h1, a1)
-    # so the warp already produces correct orientation with a8 at top-left
-    crops = split_squares(topdown, pad=2)
+    # Use taller crops to match training data
+    crops = split_squares(topdown, pad=10, height_ratio=args.height_ratio)
 
-    batch = np.stack([cv2.resize(c, (args.img_size, args.img_size)) for c in crops], axis=0)
+    # Resize to (width, height) - cv2.resize takes (width, height)
+    batch = np.stack([cv2.resize(c, (args.img_width, args.img_height)) for c in crops], axis=0)
     batch = batch.astype(np.float32)/255.0
     probs = model.predict(batch, verbose=0)
     ids = probs.argmax(axis=1).tolist()

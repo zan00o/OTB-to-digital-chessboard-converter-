@@ -1,6 +1,8 @@
 /example repo/
 *venv*/
 
+data/dataset/raw/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
