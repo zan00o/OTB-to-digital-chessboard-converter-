@@ -34,15 +34,15 @@ def annotate_image(img_path: Path, out_path: Path):
     while True:
         vis = img.copy()
 
-        cv2.putText(vis, HELP, (20, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0,255,0), 3, cv2.LINE_AA)
+        cv2.putText(vis, HELP, (20, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0,255,0), 4, cv2.LINE_AA)
         # Label points with chess square names
         labels = ["a8", "h8", "h1", "a1"]
         for i, p in enumerate(pts):
             cv2.circle(vis, p, 6, (0,0,255), -1)
             label = labels[i] if i < 4 else str(i+1)
             cv2.putText(vis, label, (p[0]+8, p[1]-8),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0,0,255), 2, cv2.LINE_AA)
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0,0,255), 3, cv2.LINE_AA)
 
         cv2.imshow("corners", vis)
         k = cv2.waitKey(20) & 0xFF
@@ -55,7 +55,7 @@ def annotate_image(img_path: Path, out_path: Path):
                 print("Need exactly 4 points.")
                 continue
             # Scale points back to original image coordinates
-            # Points are in order: a8, h8, h1, a1 (user clicked in this order)
+            # Points are clicked in square order: a8, h8, h1, a1
             scaled_pts = [[p[0] / scale, p[1] / scale] for p in pts]
             out_path.parent.mkdir(parents=True, exist_ok=True)
             with open(out_path, "w") as f:
