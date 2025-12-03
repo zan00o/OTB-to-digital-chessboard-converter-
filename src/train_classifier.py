@@ -25,28 +25,33 @@ from sklearn.model_selection import train_test_split
 import shutil
 
 # Define a small CNN model w/ tensorflow.keras
-def build_small_cnn(num_classes: int, input_size: int = 96):
+def build_transfer_model(num_classes: int, input_size: int = 96):
     from tensorflow.keras import layers, models
+    
+    # Load pretrained MobileNetV2 (more stable than EfficientNet)
+    base_model = tf.keras.applications.MobileNetV2(
+        input_shape=(input_size, input_size, 3),
+        include_top=False,
+        weights='imagenet'
+    )
+    
+    base_model.trainable = False
+    
     inputs = layers.Input(shape=(input_size, input_size, 3))
-    x = inputs
-    # 3 conv blocks with increasing filter features
-    # each layer has Conv2D + BatchNorm + ReLU + MaxPool + Dropout of 15%
-    for filters in [32, 64, 96]:
-        x = layers.Conv2D(filters, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-        x = layers.ReLU()(x)
-        x = layers.MaxPooling2D()(x)
-        x = layers.Dropout(0.1)(x)
-    # Final layers
-    x = tf.keras.layers.Conv2D(128, 3, padding="same")(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU()(x)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    x = tf.keras.layers.Dropout(0.2)(x)
-    x = tf.keras.layers.Dense(128, activation="relu")(x)
-    outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
+    x = base_model(inputs, training=False)
+    x = layers.GlobalAveragePooling2D()(x)
+    x = layers.Dropout(0.2)(x)
+    x = layers.Dense(128, activation='relu')(x)
+    x = layers.Dropout(0.2)(x)
+    outputs = layers.Dense(num_classes, activation='softmax')(x)
+    
     model = models.Model(inputs, outputs)
-    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    
     return model
 
 def main():
@@ -174,7 +179,7 @@ def main():
               .prefetch(AUTOTUNE))
 
     # Build & train model with class weights
-    model = build_small_cnn(num_classes=num_classes, input_size=args.img_size)
+    model = build_transfer_model(num_classes=num_classes, input_size=args.img_size)
     history = model.fit(train_ds, validation_data=val_ds, epochs=args.epochs, class_weight=class_weight, callbacks=callbacks)
 
     # Save model
