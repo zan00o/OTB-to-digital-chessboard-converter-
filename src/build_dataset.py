@@ -1,7 +1,7 @@
 import argparse, json, os, cv2, numpy as np
 from pathlib import Path
 from .warp import warp_board
-from .squares import split_squares, maybe_flip_180
+from .squares import split_squares
 from .fen_utils import LABELS
 
 FEN_TO_LABEL = {
@@ -27,12 +27,13 @@ def parse_fen_placement(placement):
 def process_one(image_path, corners_path, fen_str, out_root, img_size=96):
     img = cv2.imread(str(image_path))
     if img is None:
-        print(f"⚠️ Could not read image {image_path}")
+        print(f"Could not read image {image_path}")
         return
     corners = np.array(json.load(open(corners_path)), dtype=np.float32)
     topdown, _ = warp_board(img, corners, out_size=800)
-    topdown = maybe_flip_180(topdown)  # ensure A1 is dark in bottom-left to match FEN order
-    crops = split_squares(topdown, pad=2)
+    # No orientation fix needed - corners were annotated in chess order (a8, h8, h1, a1)
+    # so the warp already produces correct orientation with a8 at top-left
+    crops = split_squares(topdown, pad=10)
     labels = parse_fen_placement(fen_str.strip())
 
     for lab in LABELS:
@@ -43,7 +44,7 @@ def process_one(image_path, corners_path, fen_str, out_root, img_size=96):
         resized = cv2.resize(crop, (img_size, img_size), interpolation=cv2.INTER_AREA)
         cv2.imwrite(str(out_path), resized)
 
-    print(f"✅ {image_path.name} → {len(crops)} squares saved")
+    print(f"{image_path.name} → {len(crops)} squares saved")
 
 def main():
     ap = argparse.ArgumentParser()
@@ -79,7 +80,7 @@ def main():
             name, fen_str = line.split(",", 1)
             fen_map[name.strip()] = fen_str.strip()
         except ValueError:
-            print(f"⚠️ Skipping malformed line: {line}")
+            print(f"Skipping malformed line: {line}")
 
     for img_path in sorted(folder.glob("*")):
         if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png", ".bmp"]:
@@ -87,15 +88,15 @@ def main():
         name = img_path.name
         fen_str = fen_map.get(name)
         if not fen_str:
-            print(f"⚠️ No FEN found for {name}, skipping.")
+            print(f" No FEN found for {name}, skipping.")
             continue
         corners_path = corners_dir / f"{img_path.stem}.json"
         if not corners_path.exists():
-            print(f"⚠️ Missing corners for {name}, skipping.")
+            print(f"Missing corners for {name}, skipping.")
             continue
         process_one(img_path, corners_path, fen_str, out_root, img_size=args.img_size)
 
-    print("✅ Dataset build complete.")
+    print("Dataset build complete.")
 
 if __name__ == "__main__":
     main()

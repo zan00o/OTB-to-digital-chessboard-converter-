@@ -9,8 +9,8 @@ Allows us to associate each image with its correct board position during dataset
 """
 
 import pathlib, os 
-dir = r"C:\Users\happy\Desktop\notes\Classes\ENGR413\Chess2FEN\input_imgs"
-for i in range (1, 11):
+dir = r"C:\Users\happy\Desktop\notes\Classes\ENGR413\Chess2FEN\input_imgs\new"
+for i in range (11, 16):
     fen = (pathlib.Path(dir)/f"{i}/fen.txt").read_text()
     with open(pathlib.Path(dir)/f"{i}/fen_list.csv", "w", newline="") as f:
         for p in os.listdir(pathlib.Path(dir)/f"{i}"):
